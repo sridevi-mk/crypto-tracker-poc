@@ -35,12 +35,14 @@ export default function MarketPage() {
           <span>New to crypto?</span>
           <Link
             href="/guide"
+            title="Open a beginner-friendly explanation of crypto terms and this app's metrics"
             className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 font-semibold text-cyan-700 transition hover:bg-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-300"
           >
             Read the quick guide
           </Link>
           <Link
             href="/dashboard"
+            title="Open the Power BI-style dashboard with KPI cards, charts, and filters"
             className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 font-semibold text-emerald-700 transition hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-300"
           >
             Open Dashboard View

@@ -120,12 +120,14 @@ export default function DashboardPage() {
         <div className="flex gap-2">
           <Link
             href="/"
+            title="Return to the Market Overview page"
             className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-slate-50"
           >
             Back to Overview
           </Link>
           <Link
             href="/screener"
+            title="Open the Screener table to sort and search all listed coins"
             className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink hover:bg-slate-50"
           >
             Open Screener
@@ -139,6 +141,7 @@ export default function DashboardPage() {
           <select
             value={topN}
             onChange={(e) => setTopN(Number(e.target.value))}
+            title="Choose how many top coins to include in this dashboard"
             className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink outline-none ring-cyan-200 focus:ring-2"
           >
             <option value={20}>20</option>
@@ -152,6 +155,7 @@ export default function DashboardPage() {
           <select
             value={minMarketCap}
             onChange={(e) => setMinMarketCap(Number(e.target.value))}
+            title="Filter out coins below the selected market cap threshold"
             className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink outline-none ring-cyan-200 focus:ring-2"
           >
             <option value={0}>No minimum</option>
@@ -165,6 +169,7 @@ export default function DashboardPage() {
           <select
             value={direction}
             onChange={(e) => setDirection(e.target.value as "all" | "gainers" | "losers")}
+            title="Show all coins, only gainers, or only losers based on 24h price change"
             className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink outline-none ring-cyan-200 focus:ring-2"
           >
             <option value="all">All</option>

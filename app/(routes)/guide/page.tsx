@@ -1,9 +1,19 @@
 "use client";
+import Link from "next/link";
 
 export default function GuidePage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <div className="rounded-2xl border border-border bg-panel p-6 shadow-panel">
+      <div className="mb-4">
+        <Link
+          href="/"
+          className="inline-flex items-center rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink transition hover:bg-slate-50"
+          title="Return to the main market overview page"
+        >
+          Back to Main Page
+        </Link>
+      </div>
       <h1 className="text-3xl font-bold tracking-tight text-ink">CryptoTracker Quick Guide</h1>
       <p className="mt-2 text-sm text-mist">
         This page explains what you are seeing in the app in simple terms.
