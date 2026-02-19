@@ -17,6 +17,14 @@ interface ChatApiResponse {
   message?: string;
 }
 
+interface PageContextPayload {
+  route: string;
+  title: string;
+  headings: string[];
+  dataSourceHints: string[];
+  timestamp: string;
+}
+
 function messageId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -32,6 +40,24 @@ export function TuffyChatWidget() {
 
   const canSend = useMemo(() => input.trim().length > 0 && !isSending, [input, isSending]);
 
+  function getPageContext(): PageContextPayload {
+    const headings = Array.from(document.querySelectorAll("h1, h2"))
+      .map((el) => el.textContent?.trim() || "")
+      .filter(Boolean)
+      .slice(0, 6);
+    const dataSourceHints = Array.from(document.querySelectorAll("p, div, span"))
+      .map((el) => el.textContent?.trim() || "")
+      .filter((txt) => txt.toLowerCase().includes("data source"))
+      .slice(0, 4);
+    return {
+      route: window.location.pathname + window.location.search,
+      title: document.title || "",
+      headings,
+      dataSourceHints,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
   async function sendMessage(text: string) {
     setError(null);
     setIsSending(true);
@@ -45,6 +71,7 @@ export function TuffyChatWidget() {
         body: JSON.stringify({
           message: text,
           use_page_context: usePageContext,
+          page_context: usePageContext ? getPageContext() : undefined,
         }),
       });
       const data = (await res.json()) as ChatApiResponse;

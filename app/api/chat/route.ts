@@ -6,6 +6,16 @@ const OPENAI_MODEL = process.env.OPENAI_MODEL;
 
 const bodySchema = z.object({
   message: z.string().min(1),
+  use_page_context: z.boolean().optional().default(false),
+  page_context: z
+    .object({
+      route: z.string().optional(),
+      title: z.string().optional(),
+      headings: z.array(z.string()).optional(),
+      dataSourceHints: z.array(z.string()).optional(),
+      timestamp: z.string().optional(),
+    })
+    .optional(),
 });
 
 interface OpenAIChatResponse {
@@ -46,6 +56,14 @@ export async function POST(req: NextRequest) {
       throw new Error('Missing OPENAI_MODEL');
     }
 
+    const contextBlock =
+      parsed.data.use_page_context && parsed.data.page_context
+        ? `Page context (JSON):\n${JSON.stringify(parsed.data.page_context, null, 2)}`
+        : '';
+    const userContent = contextBlock
+      ? `${parsed.data.message}\n\n${contextBlock}`
+      : parsed.data.message;
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -58,11 +76,11 @@ export async function POST(req: NextRequest) {
           {
             role: 'system',
             content:
-              'You are Tuffy AI, a crypto market assistant. Provide concise educational guidance and avoid definitive investment recommendations.',
+              'You are Tuffy AI, a crypto market assistant. Use provided page context when available. Provide concise educational guidance and avoid definitive investment recommendations.',
           },
           {
             role: 'user',
-            content: parsed.data.message,
+            content: userContent,
           },
         ],
       }),

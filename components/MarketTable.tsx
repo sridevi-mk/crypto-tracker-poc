@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export interface MarketTableItem {
   id: string;
@@ -16,6 +16,14 @@ interface MarketTableProps {
   items: MarketTableItem[];
   isLoading?: boolean;
   error?: string | null;
+  preset?: {
+    search?: string;
+    sort?: "current_price" | "price_change_percentage_24h" | "market_cap" | "total_volume";
+    desc?: boolean;
+    direction?: "all" | "gainers" | "losers";
+    minMarketCap?: number;
+    limit?: number;
+  } | null;
 }
 
 const SORTS = [
@@ -25,10 +33,23 @@ const SORTS = [
   { value: "total_volume", label: "Volume" },
 ];
 
-export function MarketTable({ items, isLoading, error }: MarketTableProps) {
+export function MarketTable({ items, isLoading, error, preset }: MarketTableProps) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("market_cap");
   const [desc, setDesc] = useState(true);
+  const [direction, setDirection] = useState<"all" | "gainers" | "losers">("all");
+  const [minMarketCap, setMinMarketCap] = useState(0);
+  const [limit, setLimit] = useState(0);
+
+  useEffect(() => {
+    if (!preset) return;
+    if (typeof preset.search === "string") setSearch(preset.search);
+    if (preset.sort) setSort(preset.sort);
+    if (typeof preset.desc === "boolean") setDesc(preset.desc);
+    if (preset.direction) setDirection(preset.direction);
+    if (typeof preset.minMarketCap === "number") setMinMarketCap(preset.minMarketCap);
+    if (typeof preset.limit === "number") setLimit(preset.limit);
+  }, [preset]);
 
   const filtered = useMemo(() => {
     let data = items;
@@ -36,13 +57,22 @@ export function MarketTable({ items, isLoading, error }: MarketTableProps) {
       const q = search.trim().toLowerCase();
       data = data.filter((c) => c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q));
     }
+    if (minMarketCap > 0) {
+      data = data.filter((c) => (c.market_cap || 0) >= minMarketCap);
+    }
+    if (direction === "gainers") {
+      data = data.filter((c) => (c.price_change_percentage_24h || 0) >= 0);
+    } else if (direction === "losers") {
+      data = data.filter((c) => (c.price_change_percentage_24h || 0) < 0);
+    }
     data = [...data].sort((a, b) => {
       const av = a[sort as keyof MarketTableItem] as number;
       const bv = b[sort as keyof MarketTableItem] as number;
       return desc ? bv - av : av - bv;
     });
+    if (limit > 0) data = data.slice(0, limit);
     return data;
-  }, [items, search, sort, desc]);
+  }, [items, search, sort, desc, direction, minMarketCap, limit]);
 
   return (
     <div className="rounded-xl border border-border bg-panel p-4 shadow-panel">
@@ -71,6 +101,14 @@ export function MarketTable({ items, isLoading, error }: MarketTableProps) {
         >
           {desc ? "Desc" : "Asc"}
         </button>
+      </div>
+      <div className="mb-4 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-md bg-slate-100 px-2 py-1 text-mist">Direction: {direction}</span>
+        <span className="rounded-md bg-slate-100 px-2 py-1 text-mist">
+          Min Market Cap: {minMarketCap > 0 ? `$${minMarketCap.toLocaleString()}` : "None"}
+        </span>
+        <span className="rounded-md bg-slate-100 px-2 py-1 text-mist">Limit: {limit > 0 ? limit : "None"}</span>
+        <span className="rounded-md bg-slate-100 px-2 py-1 text-mist">Rows: {filtered.length}</span>
       </div>
       {isLoading ? (
         <div className="py-6 text-center text-sm text-mist">Loading market data...</div>
